@@ -1,10 +1,19 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { PostCard } from '@/components/post-card';
 import { Colors } from '@/constants/theme';
 import { usePosts, useSearchPosts } from '@/hooks/posts/use-posts';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function Home() {
@@ -13,17 +22,27 @@ export default function Home() {
   const colors = Colors[colorScheme ?? 'light'];
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  const postsQuery = usePosts();
-  const searchQuery = useSearchPosts(searchKeyword);
+  const debouncedKeyword = useDebounce(searchKeyword, 400);
 
-  const hasSearchTerm = searchKeyword.trim().length > 0;
-  const { data: posts, isLoading, isError, refetch } = hasSearchTerm ? searchQuery : postsQuery;
+  const postsQuery = usePosts();
+  const searchQuery = useSearchPosts(debouncedKeyword);
+
+  const hasSearchTerm = debouncedKeyword.trim().length > 0;
+
+  const isInitialLoading = !hasSearchTerm && postsQuery.isLoading;
+  const isSearching = hasSearchTerm && searchQuery.isFetching;
+
+  const displayPosts = hasSearchTerm
+    ? (searchQuery.data ?? postsQuery.data)
+    : postsQuery.data;
+  const displayError = hasSearchTerm ? searchQuery.isError : postsQuery.isError;
+  const displayRefetch = () => (hasSearchTerm ? searchQuery.refetch() : postsQuery.refetch());
 
   const handlePostPress = (id: string) => {
     router.push({ pathname: '/(authenticated)/post/[id]', params: { id } });
   };
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.tint} />
@@ -31,13 +50,15 @@ export default function Home() {
     );
   }
 
-  if (isError) {
+  if (displayError) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.text }]}>Erro ao carregar posts. Tente novamente.</Text>
+        <Text style={[styles.errorText, { color: colors.text }]}>
+          Erro ao carregar posts. Tente novamente.
+        </Text>
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => refetch()}
+          onPress={() => displayRefetch()}
           style={[styles.retryButton, { backgroundColor: colors.tint }]}
         >
           <Text style={styles.retryButtonText}>Tentar novamente</Text>
@@ -49,23 +70,36 @@ export default function Home() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.searchContainer, { borderColor: colors.icon }]}>
-        <TextInput
-          style={[styles.searchInput, { color: colors.text, borderColor: colors.icon }]}
-          placeholder="Buscar posts..."
-          placeholderTextColor={colors.icon}
-          value={searchKeyword}
-          onChangeText={setSearchKeyword}
-        />
+        <View style={styles.searchRow}>
+          <TextInput
+            style={[styles.searchInput, { color: colors.text, borderColor: colors.icon }]}
+            placeholder="Buscar posts..."
+            placeholderTextColor={colors.icon}
+            value={searchKeyword}
+            onChangeText={setSearchKeyword}
+          />
+          {isSearching && (
+            <ActivityIndicator
+              size="small"
+              color={colors.tint}
+              style={styles.searchIndicator}
+            />
+          )}
+        </View>
       </View>
-      {!posts || posts.length === 0 ? (
+      {!displayPosts || displayPosts.length === 0 ? (
         <View style={styles.centered}>
-          <Text style={[styles.emptyText, { color: colors.icon }]}>Nenhum post encontrado.</Text>
+          <Text style={[styles.emptyText, { color: colors.icon }]}>
+            Nenhum post encontrado.
+          </Text>
         </View>
       ) : (
         <FlatList
-          data={posts}
+          data={displayPosts}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => <PostCard post={item} onPress={() => handlePostPress(item._id)} />}
+          renderItem={({ item }) => (
+            <PostCard post={item} onPress={() => handlePostPress(item._id)} />
+          )}
           contentContainerStyle={styles.listContent}
         />
       )}
@@ -81,12 +115,21 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
   },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   searchInput: {
+    flex: 1,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
+  },
+  searchIndicator: {
+    marginLeft: 4,
   },
   listContent: {
     paddingBottom: 24,
