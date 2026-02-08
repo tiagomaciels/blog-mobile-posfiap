@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 
-import { api } from '@/lib/api';
+import { api } from '@/src/lib/api';
 import type { CreatePostDto, Post, UpdatePostDto } from '@/types/post';
 
 async function handleRequest<T>(request: () => Promise<T>): Promise<T> {
@@ -11,7 +11,7 @@ async function handleRequest<T>(request: () => Promise<T>): Promise<T> {
       throw new Error(
         typeof error.response.data === 'string'
           ? error.response.data
-          : (error.response.data as { message?: string }).message ?? error.message
+          : ((error.response.data as { message?: string }).message ?? error.message)
       );
     }
     throw error;
