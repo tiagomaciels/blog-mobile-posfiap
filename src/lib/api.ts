@@ -1,25 +1,12 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
 
 /**
  * URL base da API do backend.
  * - Android Emulator: usa 10.0.2.2 para acessar localhost do host
  * - iOS Simulator/Web: usa localhost
  */
-const getApiBaseUrl = (): string => {
-  const envUrl = process.env.EXPO_PUBLIC_API_URL;
-  if (envUrl) {
-    return envUrl;
-  }
 
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3000';
-  }
-
-  return 'http://localhost:3000';
-};
-
-export const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 /**
  * Instância configurada do Axios para chamadas à API

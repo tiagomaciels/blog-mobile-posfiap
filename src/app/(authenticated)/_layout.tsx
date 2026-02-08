@@ -1,27 +1,7 @@
-import { Stack, useRouter } from 'expo-router';
-import { Pressable, Text } from 'react-native';
+import { Stack } from 'expo-router';
 
-import { Colors } from '@/constants/theme';
-import { useAuth } from '@/contexts/auth-context';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-function LogoutButton() {
-  const { logout } = useAuth();
-  const router = useRouter();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace('/(auth)/login');
-  };
-
-  return (
-    <Pressable onPress={handleLogout} style={{ marginRight: 16 }}>
-      <Text style={{ color: colors.tint, fontSize: 16 }}>Sair</Text>
-    </Pressable>
-  );
-}
+import { HomeHeaderTitle } from '@/components/home-header-title';
+import { LogoutButton } from '@/components/logout-button';
 
 export default function AuthenticatedLayout() {
   return (
@@ -37,8 +17,14 @@ export default function AuthenticatedLayout() {
       <Stack.Screen
         name="home"
         options={{
-          title: 'Home',
+          headerTitle: () => <HomeHeaderTitle />,
           headerRight: () => <LogoutButton />,
+        }}
+      />
+      <Stack.Screen
+        name="post/[id]"
+        options={{
+          title: 'Post',
         }}
       />
     </Stack>
