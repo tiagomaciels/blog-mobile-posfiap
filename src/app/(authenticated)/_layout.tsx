@@ -1,7 +1,8 @@
 import { Stack } from 'expo-router';
 
-import { HomeHeaderTitle } from '@/components/home-header-title';
-import { LogoutButton } from '@/components/logout-button';
+import { AdminHeaderRight } from '@/components/admin/admin-header-right';
+import { HomeHeaderRight } from '@/components/home/home-header-right';
+import { HomeHeaderTitle } from '@/components/home/home-header-title';
 
 export default function AuthenticatedLayout() {
   return (
@@ -18,13 +19,32 @@ export default function AuthenticatedLayout() {
         name="home"
         options={{
           headerTitle: () => <HomeHeaderTitle />,
-          headerRight: () => <LogoutButton />,
+          headerRight: () => <HomeHeaderRight />,
+        }}
+      />
+      <Stack.Screen
+        name="admin"
+        options={{
+          title: 'Painel Administrativo',
+          headerRight: () => <AdminHeaderRight />,
         }}
       />
       <Stack.Screen
         name="post/[id]"
         options={{
           title: 'Post',
+        }}
+      />
+      <Stack.Screen
+        name="post/create-post"
+        options={{
+          title: 'Novo post',
+        }}
+      />
+      <Stack.Screen
+        name="post/edit-post/[id]"
+        options={{
+          title: 'Editar post',
         }}
       />
     </Stack>

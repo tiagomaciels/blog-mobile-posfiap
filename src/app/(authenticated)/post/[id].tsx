@@ -1,14 +1,25 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLayoutEffect } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { EditPostButton } from '@/components/post/edit-post-button';
 import { Colors } from '@/constants/theme';
 import { usePost } from '@/hooks/posts/use-post';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function PostDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+
+  useLayoutEffect(() => {
+    if (id) {
+      navigation.setOptions({
+        headerRight: () => <EditPostButton postId={id} />,
+      });
+    }
+  }, [navigation, id]);
 
   const { data: post, isLoading, isError } = usePost(id ?? '');
 

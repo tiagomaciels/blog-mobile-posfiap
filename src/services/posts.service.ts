@@ -18,11 +18,19 @@ async function handleRequest<T>(request: () => Promise<T>): Promise<T> {
   }
 }
 
+function sortByNewest(posts: Post[]): Post[] {
+  return [...posts].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
+}
+
 export const postsService = {
   async getAll(): Promise<Post[]> {
     return handleRequest(async () => {
       const { data } = await api.get<Post[]>('/posts');
-      return data;
+      return sortByNewest(data);
     });
   },
 
@@ -31,7 +39,7 @@ export const postsService = {
       const { data } = await api.get<Post[]>('/posts/search', {
         params: { q: keyword },
       });
-      return data;
+      return sortByNewest(data);
     });
   },
 

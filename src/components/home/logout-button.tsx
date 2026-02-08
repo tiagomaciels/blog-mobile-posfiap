@@ -16,8 +16,8 @@ export function LogoutButton() {
   };
 
   return (
-    <TouchableOpacity style={{ marginRight: 16 }} activeOpacity={0.7} onPress={handleLogout}>
-      <Text style={{ color: colors.tint, fontSize: 16 }}>Sair</Text>
+    <TouchableOpacity style={{ marginHorizontal: 8 }} activeOpacity={0.7} onPress={handleLogout}>
+      <Text style={{ color: colors.logout, fontSize: 16 }}>Sair</Text>
     </TouchableOpacity>
   );
 }

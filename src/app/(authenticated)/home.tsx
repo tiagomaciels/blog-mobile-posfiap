@@ -1,8 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -10,11 +12,11 @@ import {
   View,
 } from 'react-native';
 
-import { PostCard } from '@/components/post-card';
+import { PostCard } from '@/components/post/post-card';
 import { Colors } from '@/constants/theme';
 import { usePosts, useSearchPosts } from '@/hooks/posts/use-posts';
-import { useDebounce } from '@/hooks/use-debounce';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function Home() {
   const router = useRouter();
@@ -32,9 +34,7 @@ export default function Home() {
   const isInitialLoading = !hasSearchTerm && postsQuery.isLoading;
   const isSearching = hasSearchTerm && searchQuery.isFetching;
 
-  const displayPosts = hasSearchTerm
-    ? (searchQuery.data ?? postsQuery.data)
-    : postsQuery.data;
+  const displayPosts = hasSearchTerm ? (searchQuery.data ?? postsQuery.data) : postsQuery.data;
   const displayError = hasSearchTerm ? searchQuery.isError : postsQuery.isError;
   const displayRefetch = () => (hasSearchTerm ? searchQuery.refetch() : postsQuery.refetch());
 
@@ -53,9 +53,7 @@ export default function Home() {
   if (displayError) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.text }]}>
-          Erro ao carregar posts. Tente novamente.
-        </Text>
+        <Text style={[styles.errorText, { color: colors.text }]}>Erro ao carregar posts. Tente novamente.</Text>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => displayRefetch()}
@@ -78,28 +76,23 @@ export default function Home() {
             value={searchKeyword}
             onChangeText={setSearchKeyword}
           />
-          {isSearching && (
-            <ActivityIndicator
-              size="small"
-              color={colors.tint}
-              style={styles.searchIndicator}
-            />
+          {isSearching && <ActivityIndicator size="small" color={colors.tint} style={styles.searchIndicator} />}
+          {searchKeyword.length > 0 && !isSearching && (
+            <Pressable onPress={() => setSearchKeyword('')} style={styles.clearButton} hitSlop={8}>
+              <Ionicons name="close-circle" size={24} color={colors.icon} />
+            </Pressable>
           )}
         </View>
       </View>
       {!displayPosts || displayPosts.length === 0 ? (
         <View style={styles.centered}>
-          <Text style={[styles.emptyText, { color: colors.icon }]}>
-            Nenhum post encontrado.
-          </Text>
+          <Text style={[styles.emptyText, { color: colors.icon }]}>Nenhum post encontrado.</Text>
         </View>
       ) : (
         <FlatList
           data={displayPosts}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <PostCard post={item} onPress={() => handlePostPress(item._id)} />
-          )}
+          renderItem={({ item }) => <PostCard post={item} onPress={() => handlePostPress(item._id)} />}
           contentContainerStyle={styles.listContent}
         />
       )}
@@ -130,6 +123,9 @@ const styles = StyleSheet.create({
   },
   searchIndicator: {
     marginLeft: 4,
+  },
+  clearButton: {
+    padding: 4,
   },
   listContent: {
     paddingBottom: 24,
