@@ -3,11 +3,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/src/hooks/use-color-scheme';
-import { QueryClientProvider } from '@/src/providers/query-client-provider';
+import { AuthProvider } from '@/contexts/auth-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { QueryClientProvider } from '@/providers/query-client-provider';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: 'index',
 };
 
 export default function RootLayout() {
@@ -15,13 +16,12 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <StatusBar style="auto" />
+          <Stack screenOptions={{ headerShown: false }} />
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

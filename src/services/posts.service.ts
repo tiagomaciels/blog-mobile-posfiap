@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 
-import { api } from '@/src/lib/api';
+import { api } from '@/lib/api';
 import type { CreatePostDto, Post, UpdatePostDto } from '@/types/post';
 
 async function handleRequest<T>(request: () => Promise<T>): Promise<T> {
